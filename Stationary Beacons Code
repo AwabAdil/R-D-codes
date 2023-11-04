@@ -1,0 +1,220 @@
+#include <Arduino.h>
+#include <NimBLEDevice.h>
+#include <NimBLEAdvertisedDevice.h>
+#include <math.h>
+#define arraySize 20 
+double Calculate_distance (float a, float n,int avg);
+int ctr=0 ;
+int i=0;
+int scanTime = 1; // In seconds
+BLEScan *pBLEScan;
+std::string targetDeviceAddress = "C8:C9:A3:CF:2B:C2"; // Replace with the MAC address of the target device
+std::string targetDeviceAddress2 = "FE:23:62:2D:CD:0F"; // Replace with the MAC address of the target device
+float a =  -63.052;
+float n = 2.13;
+double d1 =0.0;
+double d2 =0.0;
+
+int rssiValue = 0;
+int rssiValue1 = 0;
+int avg1=0;
+int avg2=0;
+int sum1=0;
+int sum2=0;
+
+int arr[arraySize];
+int arr1[arraySize];
+
+bool targetDeviceFound = false; // Track if the target device is found
+bool targetDeviceFound1 = false; // Track if the target device is found
+
+class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
+{
+    void onResult(BLEAdvertisedDevice *advertisedDevice)
+    {if (advertisedDevice->getAddress().equals(targetDeviceAddress2))
+        {
+         
+            Serial.println("Found the target device!");
+            Serial.print("Device name: ");
+            Serial.println(advertisedDevice->getName().c_str());
+            Serial.println(" | RSSI: ");
+        rssiValue1 = advertisedDevice->getRSSI();
+            
+           
+            if (advertisedDevice->haveServiceUUID())
+            {
+                BLEUUID devUUID = advertisedDevice->getServiceUUID();
+                Serial.print("Service UUID: ");
+                Serial.println(devUUID.toString().c_str());
+            }
+
+            if (advertisedDevice->haveManufacturerData())
+            {
+                std::string strManufacturerData = advertisedDevice->getManufacturerData();
+
+                if (strManufacturerData.length() == 25 && strManufacturerData[0] == 0x4C && strManufacturerData[1] == 0x00)
+                {
+                    Serial.println("Found an iBeacon!");
+                    // Handle iBeacon data here if needed
+                }
+                else
+                {
+                    Serial.println("Found another manufacturer's beacon!");
+                    // Handle other manufacturer data here if needed
+                }
+            }
+
+            // Set the flag to stop scanning after the target device is found
+            targetDeviceFound1 = false;
+        }
+
+        if (advertisedDevice->getAddress().equals(targetDeviceAddress))
+        {
+         
+            Serial.println("Found the target device!");
+            Serial.print("Device name: ");
+            Serial.println(advertisedDevice->getName().c_str());
+            Serial.println(" | RSSI: ");
+        rssiValue = advertisedDevice->getRSSI();
+            
+           
+            if (advertisedDevice->haveServiceUUID())
+            {
+                BLEUUID devUUID = advertisedDevice->getServiceUUID();
+                Serial.print("Service UUID: ");
+                Serial.println(devUUID.toString().c_str());
+            }
+
+            if (advertisedDevice->haveManufacturerData())
+            {
+                std::string strManufacturerData = advertisedDevice->getManufacturerData();
+
+                if (strManufacturerData.length() == 25 && strManufacturerData[0] == 0x4C && strManufacturerData[1] == 0x00)
+                {
+                    Serial.println("Found an iBeacon!");
+                    // Handle iBeacon data here if needed
+                }
+                else
+                {
+                    Serial.println("Found another manufacturer's beacon!");
+                    // Handle other manufacturer data here if needed
+                }
+            }
+
+            // Set the flag to stop scanning after the target device is found
+            targetDeviceFound = false;
+        }
+    }
+
+};
+
+void setup()
+{
+    Serial.begin(115200);
+    
+
+
+    Serial.println("Scanning for the target device...");
+BLEDevice::init("");
+    pBLEScan = BLEDevice::getScan();
+    pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+    pBLEScan->setActiveScan(true);
+    pBLEScan->setInterval(100);
+    pBLEScan->setWindow(99);
+
+    Serial.print("Scanning for device with MAC address: ");
+    Serial.println(targetDeviceAddress.c_str());
+        Serial.println(targetDeviceAddress2.c_str());
+
+}
+
+void loop() 
+{
+/*********/
+
+
+/***********/
+    if (!targetDeviceFound || !targetDeviceFound1)
+    {
+        BLEScanResults foundDevices = pBLEScan->start(scanTime, false);
+        Serial.print("Devices found: ");
+        Serial.println(foundDevices.getCount());
+        Serial.println("Scan done!");
+
+        // Clear results to release memory
+        pBLEScan->clearResults();
+        //Serial.println("target device is found");
+      Serial.print("RSSI0 in loop: ");
+    Serial.println(rssiValue);
+    Serial.print("RSSI1 in loop: ");
+    Serial.println(rssiValue1);
+    Serial.print("counter:");
+        Serial.println(ctr);
+
+    arr[ctr]=rssiValue;
+   arr1[ctr]=rssiValue1;
+   
+    ctr++;
+    if (ctr==arraySize){
+            Serial.println("esp Readings");
+      Serial.print("{");
+     for ( i=0; i<arraySize;i++){
+    sum1 += arr[i];
+
+      Serial.print(arr[i]); 
+      Serial.print(",");
+              targetDeviceFound=true; 
+
+     }
+
+     Serial.println("}");
+            avg1 = sum1 / arraySize;
+     Serial.println("esp array readings average");
+          Serial.println(avg1);
+          Serial.println("The distance =");
+          d1=Calculate_distance(a,  n,  avg1);
+          Serial.println(d1);
+
+
+       Serial.println("Watch Readings");
+      Serial.print("{");
+     for ( i=0; i<arraySize;i++){
+    sum2 += arr1[i];
+
+      Serial.print(arr1[i]); 
+      Serial.print(",");
+              
+ targetDeviceFound1=true;
+     }
+     Serial.println("}");
+     avg2 = sum2 / arraySize;
+     Serial.println("esp array readings average");
+          Serial.println(avg2);
+          Serial.println("The distance =");
+          d2=Calculate_distance(a,  n,  avg2);
+          Serial.println(d2);
+    
+    
+     
+     
+
+
+    }
+    
+   
+
+
+    }
+
+
+}
+
+String intToString(int number) {
+  // Use the String class to convert the integer to a string
+  return String(number);
+  }
+double Calculate_distance (float a, float n,int avg){
+double term =((a-avg)/(10*n));
+double distance =pow(10,term);
+return distance ;
+}
