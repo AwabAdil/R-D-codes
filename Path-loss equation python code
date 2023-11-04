@@ -1,0 +1,16 @@
+def calculate_distance(RSSI, n, A):
+  # Calculate the estimated distance (d) using the path loss model
+  d = 10 ** ((A - RSSI) / (10 * n))
+  return d
+
+# Estimated values
+n_est = 1.10
+A_est = -60
+
+# Example RSSI readings
+RSSI_readings = [-50, -54, -57, -66.57, -76.59]
+
+# Calculate distances for the example readings
+for RSSI in RSSI_readings:
+  distance = calculate_distance(RSSI, n_est, A_est)
+  print(f"RSSI: {RSSI} dBm -> Estimated Distance: {distance:.2f} meters")
