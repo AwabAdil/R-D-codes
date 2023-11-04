@@ -11,7 +11,7 @@ std::string targetDeviceAddress2 = "FE:23:62:2D:CD:0F"; // Replace with the MAC 
 int rssiValue = 0;
 int rssiValue1 = 0;
 
-int arr[120];
+int arr[12440];
 int arr1[120];
 
 bool targetDeviceFound = false; // Track if the target device is found
