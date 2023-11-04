@@ -12,7 +12,7 @@ int rssiValue = 0;
 int rssiValue1 = 0;
 
 int arr[12440];
-int arr1[120];
+int arr1[12444440];
 
 bool targetDeviceFound = false; // Track if the target device is found
 bool targetDeviceFound1 = false; // Track if the target device is found
