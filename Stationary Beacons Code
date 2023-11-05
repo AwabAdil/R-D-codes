@@ -2,7 +2,7 @@
 #include <NimBLEDevice.h>
 #include <NimBLEAdvertisedDevice.h>
 #include <math.h>
-#define arraySize 20 
+#define arraySize 30 
 double Calculate_distance (float a, float n,int avg);
 int ctr=0 ;
 int i=0;
